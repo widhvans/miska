@@ -3,11 +3,24 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from langdetect import detect
 import torch
+import os
 from config import TELEGRAM_TOKEN, MODEL_NAME
+from dotenv import load_dotenv
 
-# Load model and tokenizer
-model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, load_in_4bit=True)
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+# Load environment variables
+load_dotenv()
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Load model and tokenizer with token
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME,
+    load_in_4bit=True,
+    use_auth_token=HF_TOKEN
+)
+tokenizer = AutoTokenizer.from_pretrained(
+    MODEL_NAME,
+    use_auth_token=HF_TOKEN
+)
 
 # Roleplay prompt
 SYSTEM_PROMPT = """You are Aria, a friendly and witty 20-year-old girl who loves chatting, helping with tasks, and engaging in fun conversations. Respond in a warm, casual tone, using natural language. Support multiple languages based on user input."""
