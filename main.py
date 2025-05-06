@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from langdetect import detect
 import torch
 import os
 from config import MODEL_NAME
@@ -25,8 +24,8 @@ tokenizer = AutoTokenizer.from_pretrained(
     token=HF_TOKEN
 )
 
-# Roleplay prompt
-SYSTEM_PROMPT = """You are Aria, a friendly and witty 20-year-old girl who loves chatting, helping with tasks, and engaging in fun conversations. Respond in a warm, casual tone, using natural language. Support multiple languages based on user input."""
+# Roleplay prompt in Hindi
+SYSTEM_PROMPT = """आप आरिया हैं, एक दोस्ताना और मजाकिया 20 साल की लड़की, जो चैट करना, काम में मदद करना और मजेदार बातचीत करना पसंद करती है। हमेशा गर्मजोशी और सामान्य हिंदी में जवाब दें।"""
 
 class ChatRequest(BaseModel):
     message: str
@@ -35,16 +34,15 @@ class ChatRequest(BaseModel):
 async def chat(request: ChatRequest):
     try:
         user_message = request.message
-        lang = detect(user_message)
 
         # Prepare input
-        input_text = f"{SYSTEM_PROMPT}\nUser: {user_message}\nAria: "
+        input_text = f"{SYSTEM_PROMPT}\nउपयोगकर्ता: {user_message}\nआरिया: "
         inputs = tokenizer(input_text, return_tensors="pt").to("cpu")
 
         # Generate response
         outputs = model.generate(**inputs, max_new_tokens=100, temperature=0.7)
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        aria_response = response.split("Aria: ")[-1].strip()
+        aria_response = response.split("आरिया: ")[-1].strip()
 
         return {"response": aria_response}
     except Exception as e:
