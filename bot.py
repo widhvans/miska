@@ -17,7 +17,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 app = Application.builder().token(BOT_TOKEN).build()
 request_queue = Queue()
@@ -56,10 +56,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     logger.info("Starting bot...")
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.loop.create_task(process_queue())
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    try:
+        app.add_handler(CommandHandler("start", start))
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+        app.loop.create_task(process_queue())
+        app.run_polling(allowed_updates=Update.ALL_TYPES)
+    except Exception as e:
+        logger.error(f"Bot crashed: {str(e)}")
+        raise
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
