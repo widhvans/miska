@@ -33,7 +33,7 @@ def main():
     app = Application.builder().token(TELEGRAM_TOKEN).concurrent_updates(20).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
-    app.run_polling()
+    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
-if __name__ == "__main__":
+if _name_ == "__main__":
     main()
