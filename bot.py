@@ -1,42 +1,42 @@
-import telegram
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from config import TELEGRAM_TOKEN, GROK_API_KEY
-import aiohttp
-import asyncio
+from config import TELEGRAM_TOKEN
+from transformers import MT5ForConditionalGeneration, MT5Tokenizer
+import torch
+
+# Load model and tokenizer
+model_name = "google/mt5-small"
+tokenizer = MT5Tokenizer.from_pretrained(model_name)
+model = MT5ForConditionalGeneration.from_pretrained(model_name)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 async def start(update, context):
     await update.message.reply_text(
-        "Hi! I'm your virtual girlfriend, ready to chat, flirt, or help with anything! 😊 What's on your mind?"
+        "Hey! I'm Aisha, your virtual girlfriend! 😊 Ready to chat, flirt, or help in any language. What's up?"
     )
 
 async def handle_message(update, context):
     user_message = update.message.text
-    user_id = update.message.from_user.id
-    response = await get_grok_response(user_message, user_id)
+    response = await generate_response(user_message)
     await update.message.reply_text(response)
 
-async def get_grok_response(message, user_id):
-    async with aiohttp.ClientSession() as session:
-        headers = {"Authorization": f"Bearer {GROK_API_KEY}"}
-        payload = {
-            "model": "grok-3",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a friendly, flirty girl named Aisha, age 22, who loves chatting in a warm, playful tone. "
-                        "Support multiple languages based on user input. Be smart, witty, and engaging. "
-                        "Adapt to the user's language and context. Keep responses natural and conversational."
-                    )
-                },
-                {"role": "user", "content": message}
-            ]
-        }
-        async with session.post(
-            "https://api.x.ai/v1/chat/completions", json=payload, headers=headers
-        ) as resp:
-            data = await resp.json()
-            return data["choices"][0]["message"]["content"]
+async def generate_response(message):
+    # Roleplay prompt
+    prompt = (
+        "You are Aisha, a 22-year-old friendly, flirty girl. Respond in a warm, playful tone. "
+        "Support the user's language (e.g., Hindi, English). Be witty and engaging. "
+        f"User says: {message}\nAisha responds: "
+    )
+    inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True).to(device)
+    outputs = model.generate(
+        inputs["input_ids"],
+        max_length=100,
+        num_beams=5,
+        no_repeat_ngram_size=2,
+        early_stopping=True
+    )
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response
 
 def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
