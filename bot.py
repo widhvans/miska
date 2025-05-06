@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -45,16 +44,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(reply)
 
-async def main():
+def main():
     logger.info("Starting bot...")
     try:
+        # Build application
         application = Application.builder().token(BOT_TOKEN).build()
+        
+        # Add handlers
         application.add_handler(CommandHandler("start", start))
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-        await application.run_polling(allowed_updates=Update.ALL_TYPES)
+        
+        # Run polling
+        application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
     except Exception as e:
         logger.error(f"Bot crashed: {str(e)}")
         raise
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
