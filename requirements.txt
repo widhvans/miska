@@ -1,8 +1,6 @@
 fastapi==0.115.5
 uvicorn==0.33.0
-transformers==4.51.3
-torch==2.7.0
-bitsandbytes==0.42.0
-accelerate==1.6.0
+llama-cpp-python==0.3.8
 python-telegram-bot==22.0
 requests==2.32.3
+huggingface_hub==0.30.2
