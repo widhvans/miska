@@ -13,7 +13,7 @@ logging.basicConfig(
         logging.StreamHandler()          # Log to console
     ]
 )
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"Received /start command from user {update.effective_user.id}")
@@ -40,5 +40,5 @@ def main():
     logger.info("Bot polling started")
     app.run_polling()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
