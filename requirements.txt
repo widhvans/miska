@@ -1,6 +1,2 @@
-fastapi==0.115.5
-uvicorn==0.33.0
-llama-cpp-python==0.3.8
-python-telegram-bot==22.0
-requests==2.32.3
-huggingface_hub==0.30.2
+python-telegram-bot==20.7
+requests==2.31.0
