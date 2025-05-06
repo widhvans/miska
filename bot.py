@@ -1,39 +1,39 @@
-import requests
-import logging
+import asyncio
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from config import MISTRAL_API, TELEGRAM_TOKEN
-
-# Configure logging
-logging.basicConfig(
-    filename="/root/bot.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+import requests
+from config import BOT_TOKEN, API_URL
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    response = "Hello! I am Luna, your friendly girl chatbot. How can I help you? 😊"
-    logger.info(f"User {update.effective_user.id} sent /start, responded: {response}")
-    await update.message.reply_text(response)
+    """Handle the /start command."""
+    await update.message.reply_text(
+        "Hi! I'm powered by Mistral 7B. Ask me anything in Hindi or English."
+    )
 
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle text messages."""
     user_message = update.message.text
-    logger.info(f"User {update.effective_user.id} sent: {user_message}")
     try:
-        response = requests.post(MISTRAL_API, json={"message": user_message}, timeout=15).json()
-        logger.info(f"Responded to user {update.effective_user.id}: {response['response']}")
-        await update.message.reply_text(response["response"])
-    except Exception as e:
-        error_msg = f"Oops, something went wrong! 😅 Try again later. (Error: {str(e)})"
-        logger.error(f"Error for user {update.effective_user.id}: {str(e)}")
-        await update.message.reply_text(error_msg)
+        # Send message to FastAPI server
+        response = requests.post(API_URL, json={"prompt": user_message}, timeout=10)
+        response.raise_for_status()
+        reply = response.json().get("response", "Sorry, something went wrong.")
+    except requests.RequestException as e:
+        reply = f"Error: Unable to connect to the API. Please try again later. ({str(e)})"
+    await update.message.reply_text(reply)
 
 def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).concurrent_updates(20).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
-    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+    """Run the bot."""
+    # Create the Application with the bot token
+    application = Application.builder().token(BOT_TOKEN).build()
+
+    # Add handlers
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Start the bot
+    print("Bot is running...")
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
