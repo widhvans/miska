@@ -1,8 +1,8 @@
-fastapi==0.115.5
-uvicorn==0.33.0
-transformers==4.51.3
-torch==2.7.0
-bitsandbytes==0.44.0
-accelerate==1.6.0
-python-telegram-bot==21.6
-requests==2.32.3
+fastapi
+uvicorn
+transformers
+torch
+bitsandbytes
+accelerate
+python-telegram-bot
+requests
