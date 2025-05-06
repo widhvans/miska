@@ -16,7 +16,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 # Load model and tokenizer with CPU optimization
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    torch_dtype=torch.float16,
+    torch_dtype=torch.float32,
     low_cpu_mem_usage=True,
     token=HF_TOKEN
 )
@@ -42,7 +42,7 @@ async def chat(request: ChatRequest):
         inputs = tokenizer(input_text, return_tensors="pt").to("cpu")
 
         # Generate response
-        outputs = model.generate(**inputs, max_new_tokens=150, temperature=0.7)
+        outputs = model.generate(**inputs, max_new_tokens=100, temperature=0.7)
         response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         aria_response = response.split("Aria: ")[-1].strip()
 
