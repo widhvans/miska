@@ -11,10 +11,11 @@ from dotenv import load_dotenv
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Load model and tokenizer with token
+# Load model and tokenizer with CPU optimization
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    load_in_4bit=True,
+    torch_dtype=torch.float16,
+    low_cpu_mem_usage=True,
     token=HF_TOKEN
 )
 tokenizer = AutoTokenizer.from_pretrained(
@@ -34,7 +35,7 @@ async def handle_message(update, context):
 
     # Prepare input for the model
     input_text = f"{SYSTEM_PROMPT}\nUser: {user_message}\nAria: "
-    inputs = tokenizer(input_text, return_tensors="pt").to("cuda" if torch.cuda.is_available() else "cpu")
+    inputs = tokenizer(input_text, return_tensors="pt").to("cpu")
 
     # Generate response
     outputs = model.generate(**inputs, max_new_tokens=150, temperature=0.7)
