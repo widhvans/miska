@@ -10,7 +10,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = "Hello! I am Luna, your friendly girl chatbot. How can I help you? 😊"
@@ -35,5 +35,5 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
     app.run_polling()
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
