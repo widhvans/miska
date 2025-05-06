@@ -1,5 +1,3 @@
-
-BOT_TOKEN = "5792496493:AAEdISosRZptqrYa-yNbO8R9zrat-L5TiIQ"  # Replace with your actual token
-
-# FastAPI server URL
-API_URL = "http://localhost:8000/chat"
+TELEGRAM_TOKEN = "5792496493:AAEdISosRZptqrYa-yNbO8R9zrat-L5TiIQ"  # Get from BotFather
+API_HOST = "0.0.0.0"
+API_PORT = 8000
