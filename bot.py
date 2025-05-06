@@ -34,10 +34,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.mount('http://', HTTPAdapter(max_retries=retries))
     
     try:
-        response = session.post(API_URL, json={"prompt": user_message}, timeout=30)
+        response = session.post(API_URL, json={"prompt": user_message}, timeout=20)
         response.raise_for_status()
-        reply = response.json().get("response", "Oops, something went wrong! 😔")
-        logger.info(f"API response for user {user_id}: {reply}")
+        reply = response.json().get("response", "")
+        if not reply or reply.strip() == "":
+            reply = "Oops, I got a bit shy! 😳 Try asking again, cutie! 💖"
+            logger.warning(f"Empty API response for user {user_id}")
+        else:
+            logger.info(f"API response for user {user_id}: {reply}")
     except requests.RequestException as e:
         reply = f"Aww, I'm having a little trouble! 😅 Try again in a sec, okay? ({str(e)})"
         logger.error(f"API error for user {user_id}: {str(e)}")
