@@ -37,7 +37,7 @@ async def handle_message(update, context):
     inputs = tokenizer(input_text, return_tensors="pt").to("cpu")
 
     # Generate response
-    outputs = model.generate(**inputs, max_new_tokens=80, temperature=0.7)
+    outputs = model.generate(**inputs, max_new_tokens=60, temperature=0.7)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     aria_response = response.split("आरिया: ")[-1].strip()
 
