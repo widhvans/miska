@@ -30,16 +30,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Configure retries for API requests
     session = requests.Session()
-    retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
     session.mount('http://', HTTPAdapter(max_retries=retries))
     
     try:
-        response = session.post(API_URL, json={"prompt": user_message}, timeout=20)
+        response = session.post(API_URL, json={"prompt": user_message}, timeout=10)
         response.raise_for_status()
-        reply = response.json().get("response", "")
+        result = response.json()
+        reply = result.get("response", "")
         if not reply or reply.strip() == "":
             reply = "Oops, I got a bit shy! 😳 Try asking again, cutie! 💖"
-            logger.warning(f"Empty API response for user {user_id}")
+            logger.warning(f"Empty API response for user {user_id}: {result}")
         else:
             logger.info(f"API response for user {user_id}: {reply}")
     except requests.RequestException as e:
