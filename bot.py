@@ -14,7 +14,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 # Load model and tokenizer with CPU optimization
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    torch_dtype=torch.float16,
+    torch_dtype=torch.float32,
     low_cpu_mem_usage=True,
     token=HF_TOKEN
 )
