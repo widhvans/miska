@@ -13,10 +13,11 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 # Load model and tokenizer with CPU optimization
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    torch_dtype=torch.float32,
+    torch_dtype=torch.float16,
     low_cpu_mem_usage=True,
     token=HF_TOKEN
 )
+model.gradient_checkpointing_enable()  # Reduce memory during inference
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_NAME,
     token=HF_TOKEN
@@ -36,7 +37,7 @@ async def handle_message(update, context):
     inputs = tokenizer(input_text, return_tensors="pt").to("cpu")
 
     # Generate response
-    outputs = model.generate(**inputs, max_new_tokens=100, temperature=0.7)
+    outputs = model.generate(**inputs, max_new_tokens=80, temperature=0.7)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     aria_response = response.split("आरिया: ")[-1].strip()
 
