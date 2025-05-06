@@ -1,0 +1,3 @@
+# config.py
+MISTRAL_API = "http://138.199.192.141:8000/chat"
+TELEGRAM_TOKEN = "5792496493:AAEdISosRZptqrYa-yNbO8R9zrat-L5TiIQ"
