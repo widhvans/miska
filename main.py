@@ -17,11 +17,11 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
     load_in_4bit=True,
-    use_auth_token=HF_TOKEN
+    token=HF_TOKEN
 )
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_NAME,
-    use_auth_token=HF_TOKEN
+    token=HF_TOKEN
 )
 
 # Roleplay prompt
