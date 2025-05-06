@@ -1,42 +1,34 @@
+import telegram
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from config import TELEGRAM_TOKEN
-from transformers import MT5ForConditionalGeneration, MT5Tokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from langdetect import detect
 import torch
+from config import TELEGRAM_TOKEN, MODEL_NAME
 
 # Load model and tokenizer
-model_name = "google/mt5-small"
-tokenizer = MT5Tokenizer.from_pretrained(model_name)
-model = MT5ForConditionalGeneration.from_pretrained(model_name)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, load_in_4bit=True)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+# Roleplay prompt
+SYSTEM_PROMPT = """You are Aria, a friendly and witty 20-year-old girl who loves chatting, helping with tasks, and engaging in fun conversations. Respond in a warm, casual tone, using natural language. Support multiple languages based on user input."""
 
 async def start(update, context):
-    await update.message.reply_text(
-        "Hey! I'm Aisha, your virtual girlfriend! 😊 Ready to chat, flirt, or help in any language. What's up?"
-    )
+    await update.message.reply_text("Hi! I'm Aria, your friendly chat buddy. What's up? 😊")
 
 async def handle_message(update, context):
     user_message = update.message.text
-    response = await generate_response(user_message)
-    await update.message.reply_text(response)
+    lang = detect(user_message)  # Detect language
 
-async def generate_response(message):
-    # Roleplay prompt
-    prompt = (
-        "You are Aisha, a 22-year-old friendly, flirty girl. Respond in a warm, playful tone. "
-        "Support the user's language (e.g., Hindi, English). Be witty and engaging. "
-        f"User says: {message}\nAisha responds: "
-    )
-    inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True).to(device)
-    outputs = model.generate(
-        inputs["input_ids"],
-        max_length=100,
-        num_beams=5,
-        no_repeat_ngram_size=2,
-        early_stopping=True
-    )
+    # Prepare input for the model
+    input_text = f"{SYSTEM_PROMPT}\nUser: {user_message}\nAria: "
+    inputs = tokenizer(input_text, return_tensors="pt").to("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Generate response
+    outputs = model.generate(**inputs, max_new_tokens=150, temperature=0.7)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return response
+    aria_response = response.split("Aria: ")[-1].strip()
+
+    await update.message.reply_text(aria_response)
 
 def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
